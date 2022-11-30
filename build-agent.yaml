@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
     - name: maven
-      image: maven:3-jdk-8-alpine
+      image: maven:alpine
       command:
         - cat
       tty: true
