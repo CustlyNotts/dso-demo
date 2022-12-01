@@ -115,9 +115,9 @@ pipeline {
               sh 'trivy image --exit-code 1 custlynotts/dsodemo'
             }
           }
-        }
+        }**/
       }
-    }**/
+    }
     stage('Deploy to Dev') {
       steps {
         // TODO
