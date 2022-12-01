@@ -1,66 +1,30 @@
-pipeline {
-  environment {
-    ARGO_SERVER = '35.224.29.73:32100'
-  }
+FROM maven:3.8.3-openjdk-17 AS BUILD
 
-  agent {
-    kubernetes {
-      yamlFile 'build-agent.yaml'
-      defaultContainer 'maven'
-      idleMinutes 1
-    }
-  }
-  stages {
-    stage('Build') {
-      parallel {
-        stage('Compile') {
-          steps {
-            container('maven') {
-              sh 'mvn compile'
-            }
-          }
-        }
-      }
-    }
-    stage('Test') {
-      parallel {
-        stage('Unit Tests') {
-          steps {
-            container('maven') {
-              sh 'mvn test'
-            }
-          }
-        }
-      }
-    }
-    stage('Package') {
-      parallel {
-        stage('Create Jarfile') {
-          steps {
-            container('maven') {
-              sh 'mvn package -DskipTests'
-            }
-          }
-        }
-	stage('OCI Image BnP') {
-  	  steps {
-    	    container('kaniko') {
-      		sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/custlynotts/dsodemo'
-            }	
-          }
-      	}
-      }
-    }
+WORKDIR /app
 
-    stage('Deploy to Dev') {
-      environment {
-        AUTH_TOKEN = credentials('argocd-jenkins-deployer-token')
-      }
-      steps {
-        container ('docker-tools') {
-          sh 'docker run -t schoolofdevops/argocd-cli argocd app sync dso-demo --insecure --server $ARGO_SERVER --auth-token $AUTH_TOKEN'
-          sh 'docker run -t schoolofdevops/argocd-cli argocd app wait dso-demo --health --timeout 300 --insecure --server $ARGO_SERVER --auth-token $AUTH_TOKEN
-      }
-    }
-  }
-}
+COPY .  .
+
+RUN mvn package -DskipTests
+
+FROM openjdk:18-alpine as RUN
+
+WORKDIR /run
+
+COPY --from=BUILD /app/target/demo-0.0.1-SNAPSHOT.jar demo.jar
+
+ARG USER=devops
+
+ENV HOME /home/$USER
+
+RUN adduser -D $USER && \
+    chown $USER:$USER /run/demo.jar
+
+RUN apk add --no-cache curl
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=20s --retries=2 CMD curl -f http://localhost:8080/ || exit 1
+
+USER $USER
+
+EXPOSE 8080
+
+CMD java  -jar /run/demo.jar
