@@ -48,7 +48,7 @@ pipeline {
               sh 'ls -al'
               sh '''#!/bin/bash --login
                       /bin/bash --login
-                      rvm use default
+                      rvm use ruby-3.1.1
                       gem install license_finder
                       license_finder
                     '''
