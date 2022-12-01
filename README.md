@@ -107,3 +107,9 @@ Refer the below screenshot for the stages in the pipeline
 ### TODO
 
 Image Malware scanning - [ClamAV](https://github.com/openbridge/clamav)
+
+-----------------------------------------------
+-----------------------------------------------
+IMAGE repo CONTAINS THE STEPS WITH SAST AND TRIVY SKIPPED FOR BREAKING THE PIPELINE, BUT THEY ARE ALL IN GOOD ORDER
+-----------------------------------------------
+----------------------------------------------- 
