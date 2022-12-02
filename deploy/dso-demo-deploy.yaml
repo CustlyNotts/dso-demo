@@ -17,6 +17,8 @@ spec:
       labels:
         app: dso-demo
     spec:
+      serviceAccountName: dso-demo
+      automountServiceAccountToken: false
       containers:
       - image: custlynotts/dsodemo
         name: dsodemo
@@ -30,7 +32,7 @@ spec:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           runAsNonRoot: true
-          runAsUser: 1000
+          runAsUser: 11000
         resources: 
           requests:
              cpu: "50m"
